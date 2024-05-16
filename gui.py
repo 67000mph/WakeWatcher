@@ -7,10 +7,12 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 import motion_detection
+import audio
 
 class MainWindow(QWidget):
-    def __init__(self):
+    def __init__(self, audio_player_thread):
         super().__init__()
+        self.audio_player_thread = audio_player_thread
 
         self.setWindowTitle("Wake Watcher")
 
@@ -83,8 +85,10 @@ class MainWindow(QWidget):
         self.clock_label.setText("Current Time: " + current_time)
         self.clock_label.setFont(QFont("Arial", 32))
         if self.time_input.time_edit.text() == current_time:
-          self.textbox.append("Der Wecker klingelt!")
-          self.textbox.append(f"Mache {self.exc_reps.value()} {self.exc_select.currentText()}")
+            self.textbox.append("Der Wecker klingelt!")
+            self.textbox.append(f"Mache {self.exc_reps.value()} {self.exc_select.currentText()}")
+            self.audio_player_thread.start()
+            # Problem when called again -> Threads can only be started once!
 
     def append_text(self, text):
         self.textbox.append(text)
