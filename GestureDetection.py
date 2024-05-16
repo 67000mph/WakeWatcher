@@ -12,13 +12,11 @@ def count_fingers(landmarks_list):
     if len(landmarks_list) != 0:
 
         #Check for thumb
-        print(distance_between_points(landmarks_list[4][1], landmarks_list[4][2],landmarks_list[5][1],landmarks_list[5][2]))
+        tipIds = [4, 8, 12, 16, 20]
         if (distance_between_points(landmarks_list[4][1], landmarks_list[4][2],landmarks_list[5][1],landmarks_list[5][2]) > 70) and (landmarks_list[7][2] > landmarks_list[8][2]):
             fingers_list.append(1)
-            print("offene Hand")
-        elif (landmarks_list[tipIds[0]][1] > landmarks_list[tipIds[0] - 1][1] or landmarks_list[tipIds[0]][1] < landmarks_list[tipIds[0] - 1][1]) and (landmarks_list[9][2] > landmarks_list[5][2]):
+        elif (landmarks_list[[4]][1] > landmarks_list[[4] - 1][1] or landmarks_list[[4]][1] < landmarks_list[[4] - 1][1]) and (landmarks_list[9][2] > landmarks_list[5][2]):
             fingers_list.append(1)
-            print("Daumen")
         else:
             fingers_list.append(0)
         
