@@ -2,7 +2,7 @@ import cv2
 import time
 import math
 import os
-import HandTrackingModule as htm
+import hand_tracking as htm
 
 def distance_between_points(x1, y1, x2, y2):
     return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
