@@ -1,7 +1,12 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QWidget, QTextEdit, QComboBox, QGroupBox, QFormLayout, QLineEdit, QHBoxLayout, QSpinBox
 from PyQt5.QtGui import QPixmap, QImage, QFont
 import cv2
-from PyQt5.QtCore import QTimer, QDateTime, Qt
+from PyQt5.QtCore import QTimer, QDateTime, Qt, QTime
+import mediapipe as mp
+mp_drawing = mp.solutions.drawing_utils
+mp_drawing_styles = mp.solutions.drawing_styles
+mp_pose = mp.solutions.pose
+import motion_detection
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -34,20 +39,50 @@ class MainWindow(QWidget):
         self.clock_timer.timeout.connect(self.update_time)
         self.clock_timer.start(1000)
 
+        self.mp_pose = mp.solutions.pose
+        self.pose = self.mp_pose.Pose()
+
+        self.status_jumping_jack = 0
+        self.reset_Time_jumping_jack = 0
+        self.status_push_up = 0
+        self.reset_Time_push_up = 0
+
         self.show()
 
     def update_frame(self):
         ret, frame = self.cap.read()
         if ret:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            image = QPixmap.fromImage(QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_RGB888))
+            frame, jumping_jack_detected, push_up_detected = self.detect_and_draw_pose(frame)
+            frame_image = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
+            image = QPixmap.fromImage(frame_image)
             self.label.setPixmap(image)
+            if jumping_jack_detected:
+                self.textbox.append("Jumping Jack detected!")
+            if push_up_detected:
+                self.textbox.append("Push-up detected!")
+
+    def detect_and_draw_pose(self, frame):
+        results = self.pose.process(frame)
+        jumping_jack_detected = False
+        push_up_detected = False
+        if results.pose_landmarks:
+            mp.solutions.drawing_utils.draw_landmarks(frame, results.pose_landmarks, self.mp_pose.POSE_CONNECTIONS)
+            landmarks = results.pose_landmarks.landmark
+            cTime = QTime.currentTime().second()
+            jumping_jack_detected, self.status_jumping_jack, self.reset_Time_jumping_jack = motion_detection.check_jumping_jack(
+                landmarks, self.status_jumping_jack, cTime, self.reset_Time_jumping_jack
+            )
+            push_up_detected, self.status_push_up, self.reset_Time_push_up = motion_detection.check_push_up(
+                landmarks, self.status_push_up, cTime, self.reset_Time_push_up
+            )
+        return frame, jumping_jack_detected, push_up_detected
+
 
     def update_time(self):
         current_time = QDateTime.currentDateTime().toString("hh:mm:ss")
         self.clock_label.setText("Current Time: " + current_time)
         self.clock_label.setFont(QFont("Arial", 32))
-        # self.append_text("The current time is " + current_time)
 
     def append_text(self, text):
         self.textbox.append(text)
@@ -69,42 +104,31 @@ class TimeInputWidget(QWidget):
     super(TimeInputWidget, self).__init__(parent)
     self.layout = QHBoxLayout()
 
-    # Hours input
     self.hours_box = QSpinBox()
     self.hours_box.setRange(0, 23)
     self.hours_box.setFixedWidth(40)
-    # Connect valueChanged signal to update_text slot
     self.hours_box.valueChanged.connect(self.update_text)
 
-    # Minutes input
     self.minutes_box = QSpinBox()
     self.minutes_box.setRange(0, 59)
     self.minutes_box.setFixedWidth(40)
-    # Connect valueChanged signal to update_text slot
     self.minutes_box.valueChanged.connect(self.update_text)
 
-    # Seconds input
     self.seconds_box = QSpinBox()
     self.seconds_box.setRange(0, 59)
     self.seconds_box.setFixedWidth(40)
-    # Connect valueChanged signal to update_text slot
     self.seconds_box.valueChanged.connect(self.update_text)
 
-    # Separator label 1
     self.separator_label1 = QLabel(":")
     self.separator_label1.setAlignment(Qt.AlignCenter)
-
-    # Separator label 2
     self.separator_label2 = QLabel(":")
     self.separator_label2.setAlignment(Qt.AlignCenter)
 
-    # Time display
     self.time_edit = QLineEdit()
     self.time_edit.setReadOnly(True)
     self.time_edit.setAlignment(Qt.AlignCenter)
     self.time_edit.setFixedWidth(70)
 
-    # Add widgets to layout
     self.layout.addWidget(self.hours_box)
     self.layout.addWidget(self.separator_label1)
     self.layout.addWidget(self.minutes_box)
@@ -112,21 +136,17 @@ class TimeInputWidget(QWidget):
     self.layout.addWidget(self.seconds_box)
     self.layout.addWidget(self.time_edit)
 
-    # Initial update
     self.update_text()
 
     self.setLayout(self.layout)
 
   def update_text(self):
-    # Get the current values from the spin boxes
     hours = self.hours_box.value()
     minutes = self.minutes_box.value()
     seconds = self.seconds_box.value()
     
-    # Format the time as hh:mm:ss
     time_string = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
     
-    # Update the time display
     self.time_edit.setText(time_string)
 
   def get_time(self):

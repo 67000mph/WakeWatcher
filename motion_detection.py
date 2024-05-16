@@ -6,6 +6,35 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
+def check_jumping_jack(landmarks, status_jumping_jack, cTime, reset_Time_jumping_jack):
+    if ((cTime - reset_Time_jumping_jack) > 5):
+        status_jumping_jack = 0
+        reset_Time_jumping_jack = cTime
+    if landmarks[26].y < 1 and landmarks[25].y < 1 and landmarks[14].y < 1 and landmarks[13].y < 1:
+        if status_jumping_jack == 0 and landmarks[12].y > landmarks[14].y and landmarks[11].y > landmarks[13].y and landmarks[26].x < landmarks[24].x and landmarks[25].x > landmarks[23].x:
+            status_jumping_jack = 1
+            reset_Time_jumping_jack = cTime
+        if status_jumping_jack == 1 and landmarks[12].y < landmarks[14].y and landmarks[11].y < landmarks[13].y and landmarks[26].x >= landmarks[24].x and landmarks[25].x <= landmarks[23].x:
+            status_jumping_jack = 0
+            return True, status_jumping_jack, reset_Time_jumping_jack
+    return False, status_jumping_jack, reset_Time_jumping_jack
+
+def check_push_up(landmarks, status_push_up, cTime, reset_Time_push_up):
+    if ((cTime - reset_Time_push_up) > 5):
+        status_push_up = 0
+        reset_Time_push_up = cTime
+    if landmarks[26].y > 1 and landmarks[25].y > 1 and landmarks[14].y < 1 and landmarks[13].y < 1:
+        if status_push_up == 0 and landmarks[14].y > landmarks[12].y and landmarks[13].y > landmarks[11].y and landmarks[24].y > landmarks[12].y and landmarks[23].y > landmarks[11].y:
+            status_push_up = 1
+            reset_Time_push_up = cTime
+        if status_push_up == 1 and landmarks[14].y <= landmarks[12].y and landmarks[13].y <= landmarks[11].y:
+            status_push_up = 2
+            reset_Time_push_up = cTime
+        if status_push_up == 2 and landmarks[14].y > landmarks[12].y and landmarks[13].y > landmarks[11].y and landmarks[24].y > landmarks[12].y and landmarks[23].y > landmarks[11].y:
+            status_push_up = 0
+            return True, status_push_up, reset_Time_push_up
+    return False, status_push_up, reset_Time_push_up
+
 def calculate_angle(x1, y1, x2, y2):
     dy = y2 - y1
     dx = x2 - x1
@@ -25,46 +54,15 @@ def angle_between_three_points(x1, y1, x2, y2, x3, y3):
 def distance_between_points(x1, y1, x2, y2):
     return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
-def check_wave(landmarks,status_wave):
-    if landmarks[20].y < landmarks[12].y:
-        if status_wave == 0 and 110 < calculate_angle(landmarks[20].x, landmarks[20].y, landmarks[14].x, landmarks[14].y) < 160:
-            status_wave = 1
-        if status_wave == 1 and 70 < calculate_angle(landmarks[20].x, landmarks[20].y, landmarks[14].x, landmarks[14].y) < 110:
-            status_wave = 2
-        if status_wave == 2 and 0 < calculate_angle(landmarks[20].x, landmarks[20].y, landmarks[14].x, landmarks[14].y) < 60:
-            status_wave = 3
-    return status_wave
-
-def check_jumping_jack (landmarks, status_jumping_jack, cTime, reset_Time_jumping_jack):
-  if ((cTime - reset_Time_jumping_jack) > 5):
-    status_jumping_jack = 0
-    reset_Time_jumping_jack = cTime
-  if landmarks[26].y < 1 and landmarks[25].y < 1 and landmarks[14].y < 1 and landmarks[13].y < 1:
-    if status_jumping_jack == 0 and landmarks[12].y > landmarks[14].y and landmarks[11].y > landmarks[13].y and landmarks[26].x < landmarks[24].x and landmarks[25].x > landmarks[23].x:
-      status_jumping_jack = 1
-      reset_Time_jumping_jack = cTime
-    if status_jumping_jack == 1 and landmarks[12].y < landmarks[14].y and landmarks[11].y < landmarks[13].y and landmarks[26].x >= landmarks[24].x and landmarks[25].x <= landmarks[23].x:
-      status_jumping_jack = 0
-      return True, status_jumping_jack, reset_Time_jumping_jack
-  return False, status_jumping_jack, reset_Time_jumping_jack
-
-def check_push_up(landmarks, status_push_up, cTime, reset_Time_push_up):
-  if ((cTime - reset_Time_push_up) > 5):
-    status_push_up = 0
-    reset_Time_push_up = cTime
-  if landmarks[26].y > 1 and landmarks[25].y > 1 and landmarks[14].y < 1 and landmarks[13].y < 1:
-    if status_push_up == 0 and landmarks[14].y > landmarks[12].y and landmarks[13].y > landmarks[11].y and landmarks[24].y > landmarks[12].y and landmarks[23].y > landmarks[11].y:
-      status_push_up = 1
-      reset_Time_push_up = cTime
-    if status_push_up == 1 and landmarks[14].y <= landmarks[12].y and landmarks[13].y <= landmarks[11].y:
-      status_push_up = 2
-      reset_Time_push_up = cTime
-    if status_push_up == 2 and landmarks[14].y > landmarks[12].y and landmarks[13].y > landmarks[11].y and landmarks[24].y > landmarks[12].y and landmarks[23].y > landmarks[11].y:
-      status_push_up = 0
-      return True, status_push_up, reset_Time_push_up
-  return False, status_push_up, reset_Time_push_up
-  
-  #def check_burpees
+# def check_wave(landmarks,status_wave):
+#     if landmarks[20].y < landmarks[12].y:
+#         if status_wave == 0 and 110 < calculate_angle(landmarks[20].x, landmarks[20].y, landmarks[14].x, landmarks[14].y) < 160:
+#             status_wave = 1
+#         if status_wave == 1 and 70 < calculate_angle(landmarks[20].x, landmarks[20].y, landmarks[14].x, landmarks[14].y) < 110:
+#             status_wave = 2
+#         if status_wave == 2 and 0 < calculate_angle(landmarks[20].x, landmarks[20].y, landmarks[14].x, landmarks[14].y) < 60:
+#             status_wave = 3
+#     return status_wave
       
 # For webcam input:
 # wCam, hCam = 2000, 2000
