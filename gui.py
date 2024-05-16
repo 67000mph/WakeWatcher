@@ -78,11 +78,13 @@ class MainWindow(QWidget):
             )
         return frame, jumping_jack_detected, push_up_detected
 
-
     def update_time(self):
         current_time = QDateTime.currentDateTime().toString("hh:mm:ss")
         self.clock_label.setText("Current Time: " + current_time)
         self.clock_label.setFont(QFont("Arial", 32))
+        if self.time_input.time_edit.text() == current_time:
+          self.textbox.append("Der Wecker klingelt!")
+          self.textbox.append(f"Mache {self.exc_reps.value()} {self.exc_select.currentText()}")
 
     def append_text(self, text):
         self.textbox.append(text)
@@ -90,13 +92,14 @@ class MainWindow(QWidget):
     def create_input_box(self):
         self.input_box = QGroupBox("Einstellungen")
         layout = QFormLayout()
-        time_input = TimeInputWidget()
-        layout.addRow(QLabel("Weckzeit:"), time_input)
-        exc_select = QComboBox()
-        exc_select.addItem("Liegestütz")
-        exc_select.addItem("Hampelmann")
-        layout.addRow(QLabel("Übung:"), exc_select)
-        layout.addRow(QLabel("Wiederholungen:"), QSpinBox())
+        self.time_input = TimeInputWidget()
+        layout.addRow(QLabel("Weckzeit:"), self.time_input)
+        self.exc_select = QComboBox()
+        self.exc_select.addItem("Liegestütz")
+        self.exc_select.addItem("Hampelmann")
+        layout.addRow(QLabel("Übung:"), self.exc_select)
+        self.exc_reps = QSpinBox()
+        layout.addRow(QLabel("Wiederholungen:"), self.exc_reps)
         self.input_box.setLayout(layout)
 
 class TimeInputWidget(QWidget):
