@@ -14,7 +14,7 @@ def check_jumping_jack(landmarks, status_jumping_jack, cTime, reset_Time_jumping
         if status_jumping_jack == 0 and landmarks[12].y > landmarks[14].y and landmarks[11].y > landmarks[13].y and landmarks[26].x < landmarks[24].x and landmarks[25].x > landmarks[23].x:
             status_jumping_jack = 1
             reset_Time_jumping_jack = cTime
-        if status_jumping_jack == 1 and landmarks[12].y < landmarks[14].y and landmarks[11].y < landmarks[13].y and landmarks[26].x >= landmarks[24].x and landmarks[25].x <= landmarks[23].x:
+        if status_jumping_jack == 1 and landmarks[12].y < landmarks[14].y and landmarks[11].y < landmarks[13].y and landmarks[26].x >= landmarks[24].x and landmarks[25].x <= landmarks[23].x and landmarks[16].y < landmarks[14].y and landmarks[15].y < landmarks[13].y:
             status_jumping_jack = 0
             return True, status_jumping_jack, reset_Time_jumping_jack
     return False, status_jumping_jack, reset_Time_jumping_jack
@@ -23,17 +23,39 @@ def check_push_up(landmarks, status_push_up, cTime, reset_Time_push_up):
     if ((cTime - reset_Time_push_up) > 5):
         status_push_up = 0
         reset_Time_push_up = cTime
-    if landmarks[26].y > 1 and landmarks[25].y > 1 and landmarks[14].y < 1 and landmarks[13].y < 1:
-        if status_push_up == 0 and landmarks[14].y > landmarks[12].y and landmarks[13].y > landmarks[11].y and landmarks[24].y > landmarks[12].y and landmarks[23].y > landmarks[11].y:
+    if landmarks[26].y > 1 and landmarks[25].y > 1 and landmarks[14].y < 1 and landmarks[13].y < 1 and landmarks[16].y < 1 and landmarks[15].y < 1:
+        if status_push_up == 0 and landmarks[14].y > landmarks[12].y and landmarks[13].y > landmarks[11].y and landmarks[16].y > landmarks[14].y and landmarks[15].y > landmarks[13].y:
             status_push_up = 1
             reset_Time_push_up = cTime
-        if status_push_up == 1 and landmarks[14].y <= landmarks[12].y and landmarks[13].y <= landmarks[11].y:
+        if status_push_up == 1 and landmarks[14].y <= landmarks[12].y and landmarks[13].y <= landmarks[11].y and landmarks[16].y > landmarks[14].y and landmarks[15].y > landmarks[13].y:
             status_push_up = 2
             reset_Time_push_up = cTime
-        if status_push_up == 2 and landmarks[14].y > landmarks[12].y and landmarks[13].y > landmarks[11].y and landmarks[24].y > landmarks[12].y and landmarks[23].y > landmarks[11].y:
+        if status_push_up == 2 and landmarks[14].y > landmarks[12].y and landmarks[13].y > landmarks[11].y and landmarks[24].y > landmarks[12].y and landmarks[23].y > landmarks[11].y and landmarks[16].y > landmarks[14].y and landmarks[15].y > landmarks[13].y:
             status_push_up = 0
             return True, status_push_up, reset_Time_push_up
     return False, status_push_up, reset_Time_push_up
+
+
+
+# def check_push_up(landmarks, status_push_up, cTime, reset_Time_push_up):
+#     if ((cTime - reset_Time_push_up) > 5):
+#         status_push_up = 0
+#         reset_Time_push_up = cTime
+#     if landmarks[26].y > 1 and landmarks[25].y > 1 and landmarks[14].y < 1 and landmarks[13].y < 1 and landmarks[16].y > landmarks[14].y and landmarks[15].y > landmarks[13].y:
+#         print('Liegestütz')
+#         if status_push_up == 0 and landmarks[14].y > landmarks[12].y and landmarks[13].y > landmarks[11].y and landmarks[24].y > landmarks[12].y and landmarks[23].y > landmarks[11].y and landmarks[16].y > landmarks[14].y and landmarks[15].y > landmarks[13].y:
+#             status_push_up = 1
+#             reset_Time_push_up = cTime
+#             print('1 Liegestütz')
+#         if status_push_up == 1 and landmarks[14].y <= landmarks[12].y and landmarks[13].y <= landmarks[11].y and landmarks[16].y > landmarks[14].y and landmarks[15].y > landmarks[13].y:
+#             status_push_up = 2
+#             reset_Time_push_up = cTime
+#             print('2 Liegestütz')
+#         if status_push_up == 2 and landmarks[14].y > landmarks[12].y and landmarks[13].y > landmarks[11].y and landmarks[24].y > landmarks[12].y and landmarks[23].y > landmarks[11].y and landmarks[16].y > landmarks[14].y and landmarks[15].y > landmarks[13].y:
+#             status_push_up = 0
+#             print('3 Liegestütz')
+#             return True, status_push_up, reset_Time_push_up
+#     return False, status_push_up, reset_Time_push_up
 
 def calculate_angle(x1, y1, x2, y2):
     dy = y2 - y1
@@ -65,71 +87,70 @@ def distance_between_points(x1, y1, x2, y2):
 #     return status_wave
       
 # For webcam input:
-# wCam, hCam = 2000, 2000
-# cap = cv2.VideoCapture(0)
-# cap.set(3, wCam)
-# cap.set(4, hCam)
-# status_wave = 0
-# count_hampel = 0
-# elbow_higher = False
-# cTime = time.time()
-# status_jumping_jack = 0
-# reset_Time_jumping_jack = 0
-# count_jumping_jack = 0
-# status_push_up = 0
-# reset_Time_push_up = 0
-# count_push_up = 0
+wCam, hCam = 2000, 2000
+cap = cv2.VideoCapture(0)
+cap.set(3, wCam)
+cap.set(4, hCam)
+status_wave = 0
+count_hampel = 0
+elbow_higher = False
+cTime = time.time()
+status_jumping_jack = 0
+reset_Time_jumping_jack = 0
+count_jumping_jack = 0
+status_push_up = 0
+reset_Time_push_up = 0
+count_push_up = 0
 
-# with mp_pose.Pose(
-#     min_detection_confidence=0.5,
-#     min_tracking_confidence=0.5) as pose:
-#   while cap.isOpened():
-#     success, image = cap.read()
-#     if not success:
-#       print("Ignoring empty camera frame.")
-#       # If loading a video, use 'break' instead of 'continue'.
-#       continue
+with mp_pose.Pose(
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5) as pose:
+  while cap.isOpened():
+    success, image = cap.read()
+    if not success:
+      print("Ignoring empty camera frame.")
+      # If loading a video, use 'break' instead of 'continue'.
+      continue
 
-#     # To improve performance, optionally mark the image as not writeable to
-#     # pass by reference.
-#     image.flags.writeable = False
-#     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-#     results = pose.process(image)
+    # To improve performance, optionally mark the image as not writeable to
+    # pass by reference.
+    image.flags.writeable = False
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    results = pose.process(image)
 
-#     #Check if the user is waving
-#     if hasattr(results.pose_landmarks, 'landmark'):
-#       #check_wave(results.pose_landmarks.landmark)
-#       if len(results.pose_landmarks.landmark) != 0:
-#         #count_hampel, elbow_higher = check_hampel(results.pose_landmarks.landmark, count_hampel, elbow_higher)
-#         dinstance = distance_between_points(results.pose_landmarks.landmark[26].x, results.pose_landmarks.landmark[26].y, results.pose_landmarks.landmark[25].x, results.pose_landmarks.landmark[25].y)
-#         angle = angle_between_three_points(results.pose_landmarks.landmark[26].x, results.pose_landmarks.landmark[26].y, results.pose_landmarks.landmark[0].x, results.pose_landmarks.landmark[0].y, results.pose_landmarks.landmark[25].x, results.pose_landmarks.landmark[25].y)
-#         jumping_jack, status_jumping_jack, reset_Time_jumping_jack = check_jumping_jack(results.pose_landmarks.landmark, status_jumping_jack, cTime, reset_Time_jumping_jack)
-#         if jumping_jack:
-#            count_jumping_jack += 1
-#         print (f'Anzahl Hampelmann {count_jumping_jack}')
-#         push_up, status_push_up, reset_Time_push_up = check_push_up(results.pose_landmarks.landmark, status_push_up, cTime, reset_Time_push_up)
-#         if push_up:
-#            count_push_up += 1
-#         print(f'Anzahl Liegestuetze {count_push_up}')
+    #Check if the user is waving
+    if hasattr(results.pose_landmarks, 'landmark'):
+      if len(results.pose_landmarks.landmark) != 0:
+        jumping_jack, status_jumping_jack, reset_Time_jumping_jack = check_jumping_jack(results.pose_landmarks.landmark, status_jumping_jack, cTime, reset_Time_jumping_jack)
+        if jumping_jack:
+           count_jumping_jack += 1
+        print (f'Anzahl Hampelmann {count_jumping_jack}')
 
-#         print(results.pose_landmarks.landmark[16].y)
+        push_up, status_push_up, reset_Time_push_up = check_push_up(results.pose_landmarks.landmark, status_push_up, cTime, reset_Time_push_up)
+        if push_up:
+           count_push_up += 1
+        print(f'Anzahl Liegestuetze {count_push_up}')
+
+        
+        # print(f'Hand {results.pose_landmarks.landmark[16].y}')
+        # print(f'Ellebogen {results.pose_landmarks.landmark[14].y}')
 
 
-#     # Draw the pose annotation on the image.
-#     image.flags.writeable = True
-#     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-#     mp_drawing.draw_landmarks(
-#         image,
-#         results.pose_landmarks,
-#         mp_pose.POSE_CONNECTIONS,
-#         landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
-#     # Flip the image horizontally for a selfie-view display.
-#     cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))
-#     if cv2.waitKey(5) & 0xFF == 27:
-#       break
+    # Draw the pose annotation on the image.
+    image.flags.writeable = True
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    mp_drawing.draw_landmarks(
+        image,
+        results.pose_landmarks,
+        mp_pose.POSE_CONNECTIONS,
+        landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+    # Flip the image horizontally for a selfie-view display.
+    cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))
+    if cv2.waitKey(5) & 0xFF == 27:
+      break
 
-#     # wave detection
-#     if status_wave == 3:
-#        print("got waving?")
-#        status_wave = 0
-# cap.release()
+    # wave detection
+    if status_wave == 3:
+       print("got waving?")
+       status_wave = 0
+cap.release()
