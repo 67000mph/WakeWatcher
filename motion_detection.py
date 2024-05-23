@@ -112,74 +112,74 @@ def distance_between_points(x1, y1, x2, y2):
 #     return status_wave
 
 # For webcam input:
-wCam, hCam = 2000, 2000
-cap = cv2.VideoCapture(0)
-cap.set(3, wCam)
-cap.set(4, hCam)
-status_wave = 0
-count_hampel = 0
-elbow_higher = False
+# wCam, hCam = 2000, 2000
+# cap = cv2.VideoCapture(0)
+# cap.set(3, wCam)
+# cap.set(4, hCam)
+# status_wave = 0
+# count_hampel = 0
+# elbow_higher = False
 
-status_jumping_jack = 0
-reset_Time_jumping_jack = 0
-count_jumping_jack = 0
-status_push_up = 0
-reset_Time_push_up = 0
-count_push_up = 0
+# status_jumping_jack = 0
+# reset_Time_jumping_jack = 0
+# count_jumping_jack = 0
+# status_push_up = 0
+# reset_Time_push_up = 0
+# count_push_up = 0
 
-if __name__ == "__main__":
-    with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
-        while cap.isOpened():
-            cTime = time.time()  #!!!!!
-            success, image = cap.read()
-            if not success:
-                print("Ignoring empty camera frame.")
-                # If loading a video, use 'break' instead of 'continue'.
-                continue
+# if __name__ == "__main__":
+#     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+#         while cap.isOpened():
+#             cTime = time.time()  #!!!!!
+#             success, image = cap.read()
+#             if not success:
+#                 print("Ignoring empty camera frame.")
+#                 # If loading a video, use 'break' instead of 'continue'.
+#                 continue
 
-            # To improve performance, optionally mark the image as not writeable to
-            # pass by reference.
-            image.flags.writeable = False
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            results = pose.process(image)
+#             # To improve performance, optionally mark the image as not writeable to
+#             # pass by reference.
+#             image.flags.writeable = False
+#             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+#             results = pose.process(image)
 
-            # Check if the user is waving
-            if hasattr(results.pose_landmarks, "landmark"):
-                if len(results.pose_landmarks.landmark) != 0:
-                    jumping_jack, status_jumping_jack, reset_Time_jumping_jack = (
-                        check_jumping_jack(
-                            results.pose_landmarks.landmark,
-                            status_jumping_jack,
-                            cTime,
-                            reset_Time_jumping_jack,
-                        )
-                    )
-                    if jumping_jack:
-                        count_jumping_jack += 1
-                        print(f"Anzahl Hampelmann {count_jumping_jack}")
+#             # Check if the user is waving
+#             if hasattr(results.pose_landmarks, "landmark"):
+#                 if len(results.pose_landmarks.landmark) != 0:
+#                     jumping_jack, status_jumping_jack, reset_Time_jumping_jack = (
+#                         check_jumping_jack(
+#                             results.pose_landmarks.landmark,
+#                             status_jumping_jack,
+#                             cTime,
+#                             reset_Time_jumping_jack,
+#                         )
+#                     )
+#                     if jumping_jack:
+#                         count_jumping_jack += 1
+#                         print(f"Anzahl Hampelmann {count_jumping_jack}")
 
-                    push_up, status_push_up, reset_Time_push_up = check_push_up(
-                        results.pose_landmarks.landmark,
-                        status_push_up,
-                        cTime,
-                        reset_Time_push_up,
-                    )
-                    if push_up:
-                        count_push_up += 1
-                        print(f"Anzahl Liegestuetze {count_push_up}")
+#                     push_up, status_push_up, reset_Time_push_up = check_push_up(
+#                         results.pose_landmarks.landmark,
+#                         status_push_up,
+#                         cTime,
+#                         reset_Time_push_up,
+#                     )
+#                     if push_up:
+#                         count_push_up += 1
+#                         print(f"Anzahl Liegestuetze {count_push_up}")
 
-            # Draw the pose annotation on the image.
-            image.flags.writeable = True
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            mp_drawing.draw_landmarks(
-                image,
-                results.pose_landmarks,
-                mp_pose.POSE_CONNECTIONS,
-                landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style(),
-            )
-            # Flip the image horizontally for a selfie-view display.
-            cv2.imshow("MediaPipe Pose", cv2.flip(image, 1))
-            if cv2.waitKey(5) & 0xFF == 27:
-                break
+#             # Draw the pose annotation on the image.
+#             image.flags.writeable = True
+#             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+#             mp_drawing.draw_landmarks(
+#                 image,
+#                 results.pose_landmarks,
+#                 mp_pose.POSE_CONNECTIONS,
+#                 landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style(),
+#             )
+#             # Flip the image horizontally for a selfie-view display.
+#             cv2.imshow("MediaPipe Pose", cv2.flip(image, 1))
+#             if cv2.waitKey(5) & 0xFF == 27:
+#                 break
 
-    cap.release()
+#     cap.release()

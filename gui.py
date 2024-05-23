@@ -49,7 +49,14 @@ class MainWindow(QWidget):
         self.status_push_up = 0
         self.reset_Time_push_up = 0
 
+        self.exc_count = 0
+        self.alarm_active = False
+
         self.show()
+
+    def closeEvent(self, event):
+        self.audio_player_thread.stop()
+        super().closeEvent(event)
 
     def update_frame(self):
         ret, frame = self.cap.read()
@@ -60,9 +67,20 @@ class MainWindow(QWidget):
             image = QPixmap.fromImage(frame_image)
             self.label.setPixmap(image)
             if jumping_jack_detected:
-                self.textbox.append("Jumping Jack detected!")
+                if self.exc_select.currentText() == "Hampelmann":
+                    self.count_reps()
             if push_up_detected:
-                self.textbox.append("Push-up detected!")
+                if self.exc_select.currentText() == "Liegestütz":
+                    self.count_reps()
+
+    def count_reps(self):
+        if self.alarm_active:
+            self.exc_count += 1
+            self.textbox.append(f"{self.exc_count}")
+            if self.exc_count == int(self.exc_reps.text()):
+                self.alarm_active = False
+                self.audio_player_thread.stop()
+                self.textbox.append("Fertig!")
 
     def detect_and_draw_pose(self, frame):
         results = self.pose.process(frame)
@@ -88,6 +106,8 @@ class MainWindow(QWidget):
             self.textbox.append("Der Wecker klingelt!")
             self.textbox.append(f"Mache {self.exc_reps.value()} {self.exc_select.currentText()}")
             self.audio_player_thread.start()
+            self.alarm_active = True
+            self.exc_count = 0
             # Problem when called again -> Threads can only be started once!
 
     def append_text(self, text):
