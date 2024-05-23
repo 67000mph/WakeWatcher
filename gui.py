@@ -10,9 +10,9 @@ import motion_detection
 import audio
 
 class MainWindow(QWidget):
-    def __init__(self, audio_player_thread):
+    def __init__(self):
         super().__init__()
-        self.audio_player_thread = audio_player_thread
+        self.audio_player_thread = None
 
         self.setWindowTitle("Wake Watcher")
 
@@ -77,9 +77,10 @@ class MainWindow(QWidget):
         if self.alarm_active:
             self.exc_count += 1
             self.textbox.append(f"{self.exc_count}")
-            if self.exc_count == int(self.exc_reps.text()):
+            if self.exc_count >= int(self.exc_reps.text()):
                 self.alarm_active = False
                 self.audio_player_thread.stop()
+                self.audio_player_thread = None
                 self.textbox.append("Fertig!")
 
     def detect_and_draw_pose(self, frame):
@@ -105,10 +106,10 @@ class MainWindow(QWidget):
         if self.time_input.time_edit.text() == current_time:
             self.textbox.append("Der Wecker klingelt!")
             self.textbox.append(f"Mache {self.exc_reps.value()} {self.exc_select.currentText()}")
+            self.audio_player_thread = audio.AudioPlayerThread(audio.ALARM_FILE)
             self.audio_player_thread.start()
             self.alarm_active = True
             self.exc_count = 0
-            # Problem when called again -> Threads can only be started once!
 
     def append_text(self, text):
         self.textbox.append(text)

@@ -1,8 +1,8 @@
-from timeit import Timer
 from pydub import AudioSegment
 from pydub.playback import _play_with_pyaudio
-import time
 import threading
+
+ALARM_FILE = "arrow-whoosh.wav"
 
 class AudioPlayerThread(threading.Thread):
     def __init__(self, file_path):
