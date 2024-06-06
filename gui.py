@@ -16,9 +16,9 @@ class MainWindow(QWidget):
 
         self.setWindowTitle("Wake Watcher")
 
-        self.label = QLabel(self)
+        self.img_label = QLabel(self)
         self.layout = QVBoxLayout()
-        self.layout.addWidget(self.label)
+        self.layout.addWidget(self.img_label)
 
         self.clock_label = QLabel(self)
         self.layout.addWidget(self.clock_label)
@@ -28,9 +28,21 @@ class MainWindow(QWidget):
 
         self.textbox = QTextEdit(self)
         self.textbox.setReadOnly(True)
+        font = QFont()
+        font.setPointSize(16)
+        self.textbox.setFont(font)
         self.layout.addWidget(self.textbox)
 
-        self.setLayout(self.layout)
+        left_layout = QVBoxLayout()
+        left_layout.addWidget(self.img_label)
+        left_layout.addWidget(self.clock_label)
+        left_layout.addWidget(self.input_box)
+
+        main_layout = QHBoxLayout()
+        main_layout.addLayout(left_layout)
+        main_layout.addWidget(self.textbox)
+
+        self.setLayout(main_layout)
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_frame)
@@ -67,7 +79,10 @@ class MainWindow(QWidget):
             frame, jumping_jack_detected, push_up_detected, squat_detected = self.detect_and_draw_pose(frame)
             frame_image = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
             image = QPixmap.fromImage(frame_image)
-            self.label.setPixmap(image)
+            width = image.width() * 1.65
+            height = image.height() * 1.65
+            scaled_image = image.scaled(int(width), int(height), Qt.KeepAspectRatio)
+            self.img_label.setPixmap(scaled_image)
             if jumping_jack_detected:
                 if self.exc_select.currentText() == "Hampelmann":
                     self.count_reps()
@@ -136,6 +151,7 @@ class MainWindow(QWidget):
         self.exc_reps = QSpinBox()
         layout.addRow(QLabel("Wiederholungen:"), self.exc_reps)
         self.input_box.setLayout(layout)
+        self.input_box.setFixedSize(400, 150) 
 
 class TimeInputWidget(QWidget):
   def __init__(self, parent=None):
