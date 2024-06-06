@@ -48,6 +48,8 @@ class MainWindow(QWidget):
         self.reset_Time_jumping_jack = 0
         self.status_push_up = 0
         self.reset_Time_push_up = 0
+        self.status_squat = 0
+        self.reset_Time_squat = 0
 
         self.exc_count = 0
         self.alarm_active = False
@@ -62,7 +64,7 @@ class MainWindow(QWidget):
         ret, frame = self.cap.read()
         if ret:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            frame, jumping_jack_detected, push_up_detected = self.detect_and_draw_pose(frame)
+            frame, jumping_jack_detected, push_up_detected, squat_detected = self.detect_and_draw_pose(frame)
             frame_image = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
             image = QPixmap.fromImage(frame_image)
             self.label.setPixmap(image)
@@ -71,6 +73,9 @@ class MainWindow(QWidget):
                     self.count_reps()
             if push_up_detected:
                 if self.exc_select.currentText() == "Liegestütz":
+                    self.count_reps()
+            if squat_detected:
+                if self.exc_select.currentText() == "Kniebeuge":
                     self.count_reps()
 
     def count_reps(self):
@@ -87,6 +92,7 @@ class MainWindow(QWidget):
         results = self.pose.process(frame)
         jumping_jack_detected = False
         push_up_detected = False
+        squat_detected = False
         if results.pose_landmarks:
             mp.solutions.drawing_utils.draw_landmarks(frame, results.pose_landmarks, self.mp_pose.POSE_CONNECTIONS)
             landmarks = results.pose_landmarks.landmark
@@ -97,11 +103,14 @@ class MainWindow(QWidget):
             push_up_detected, self.status_push_up, self.reset_Time_push_up = motion_detection.check_push_up(
                 landmarks, self.status_push_up, cTime, self.reset_Time_push_up
             )
-        return frame, jumping_jack_detected, push_up_detected
+            squat_detected, self.status_squat, self.reset_Time_squat = motion_detection.check_squat(
+                landmarks, self.status_squat, cTime, self.reset_Time_squat
+            )
+        return frame, jumping_jack_detected, push_up_detected, squat_detected
 
     def update_time(self):
         current_time = QDateTime.currentDateTime().toString("hh:mm:ss")
-        self.clock_label.setText("Current Time: " + current_time)
+        self.clock_label.setText("Aktuelle Uhrzeit: " + current_time)
         self.clock_label.setFont(QFont("Arial", 32))
         if self.time_input.time_edit.text() == current_time:
             self.textbox.append("Der Wecker klingelt!")
@@ -122,6 +131,7 @@ class MainWindow(QWidget):
         self.exc_select = QComboBox()
         self.exc_select.addItem("Liegestütz")
         self.exc_select.addItem("Hampelmann")
+        self.exc_select.addItem("Kniebeuge")
         layout.addRow(QLabel("Übung:"), self.exc_select)
         self.exc_reps = QSpinBox()
         layout.addRow(QLabel("Wiederholungen:"), self.exc_reps)
