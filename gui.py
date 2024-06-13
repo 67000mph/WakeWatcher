@@ -23,6 +23,9 @@ class MainWindow(QWidget):
         self.clock_label = QLabel(self)
         self.layout.addWidget(self.clock_label)
 
+        self.exc_image_label = QLabel()
+        self.layout.addWidget(self.exc_image_label)
+
         self.create_input_box()
         self.layout.addWidget(self.input_box)
 
@@ -35,12 +38,16 @@ class MainWindow(QWidget):
 
         left_layout = QVBoxLayout()
         left_layout.addWidget(self.img_label)
-        left_layout.addWidget(self.clock_label)
-        left_layout.addWidget(self.input_box)
+
+        right_layout = QVBoxLayout()
+        right_layout.addWidget(self.clock_label)
+        right_layout.addWidget(self.input_box)
+        right_layout.addWidget(self.exc_image_label)
+        right_layout.addWidget(self.textbox)
 
         main_layout = QHBoxLayout()
         main_layout.addLayout(left_layout)
-        main_layout.addWidget(self.textbox)
+        main_layout.addLayout(right_layout)
 
         self.setLayout(main_layout)
 
@@ -126,7 +133,7 @@ class MainWindow(QWidget):
     def update_time(self):
         current_time = QDateTime.currentDateTime().toString("hh:mm:ss")
         self.clock_label.setText("Aktuelle Uhrzeit: " + current_time)
-        self.clock_label.setFont(QFont("Arial", 32))
+        self.clock_label.setFont(QFont("Arial", 40))
         if self.time_input.time_edit.text() == current_time:
             self.textbox.append("Der Wecker klingelt!")
             self.textbox.append(f"Mache {self.exc_reps.value()} {self.exc_select.currentText()}")
@@ -146,12 +153,49 @@ class MainWindow(QWidget):
         self.exc_select = QComboBox()
         self.exc_select.addItem("Liegestütz")
         self.exc_select.addItem("Hampelmann")
-        self.exc_select.addItem("Kniebeuge")
+        self.exc_select.addItem("Kniebeuge")     
+        self.exc_select.currentIndexChanged.connect(self.update_image)
+        self.exc_select.setCurrentIndex(self.exc_select.findText("Liegestütz"))
+        self.update_image() 
+
         layout.addRow(QLabel("Übung:"), self.exc_select)
         self.exc_reps = QSpinBox()
         layout.addRow(QLabel("Wiederholungen:"), self.exc_reps)
         self.input_box.setLayout(layout)
-        self.input_box.setFixedSize(400, 150) 
+        font_size = 20
+        self.input_box.setStyleSheet(f"*{{font-size: {font_size}pt;}}")
+        self.input_box.setFixedSize(600, 200) 
+
+    def update_image(self):
+                selected_exercise = self.exc_select.currentText() 
+                if selected_exercise == "Liegestütz":
+                    image_path = "Liegestütz.jpg" 
+                elif selected_exercise == "Hampelmann":
+                    image_path = "Hampelmann.jpg" 
+                elif selected_exercise == "Kniebeuge":
+                    image_path = "Kniebeuge.jpg" 
+                else:
+                    image_path = None 
+
+                if image_path:
+                    loaded_image = QImage(image_path)
+                    if loaded_image.isNull():
+                        print(f"Error loading image: {image_path}")
+                    else:
+                        resized_image = loaded_image.scaled(800, 800, Qt.KeepAspectRatio)
+                        if not resized_image.isNull():
+                            print("SUCCESS")
+                        else:
+                            print("IS NULL")
+                        self.exc_image_label.setPixmap(QPixmap(resized_image))
+                else:
+                    self.exc_image_label.clear()
+
+                # if image_path:
+                #     self.exc_image_label.setPixmap(QPixmap(image_path))
+                # else:
+                #     self.exc_image_label.clear() 
+
 
 class TimeInputWidget(QWidget):
   def __init__(self, parent=None):
@@ -160,17 +204,20 @@ class TimeInputWidget(QWidget):
 
     self.hours_box = QSpinBox()
     self.hours_box.setRange(0, 23)
-    self.hours_box.setFixedWidth(40)
+    self.hours_box.setFixedWidth(52)
+    self.hours_box.setAlignment(Qt.AlignCenter)
     self.hours_box.valueChanged.connect(self.update_text)
 
     self.minutes_box = QSpinBox()
     self.minutes_box.setRange(0, 59)
-    self.minutes_box.setFixedWidth(40)
+    self.minutes_box.setFixedWidth(52)
+    self.minutes_box.setAlignment(Qt.AlignCenter)
     self.minutes_box.valueChanged.connect(self.update_text)
 
     self.seconds_box = QSpinBox()
     self.seconds_box.setRange(0, 59)
-    self.seconds_box.setFixedWidth(40)
+    self.seconds_box.setFixedWidth(52)
+    self.seconds_box.setAlignment(Qt.AlignCenter)
     self.seconds_box.valueChanged.connect(self.update_text)
 
     self.separator_label1 = QLabel(":")
@@ -181,7 +228,7 @@ class TimeInputWidget(QWidget):
     self.time_edit = QLineEdit()
     self.time_edit.setReadOnly(True)
     self.time_edit.setAlignment(Qt.AlignCenter)
-    self.time_edit.setFixedWidth(70)
+    self.time_edit.setFixedWidth(140)
 
     self.layout.addWidget(self.hours_box)
     self.layout.addWidget(self.separator_label1)
